@@ -73,3 +73,17 @@ export const AtsConfigFieldPreview = ({
   }
   return assertIsNever(field);
 };
+
+type AtsConfigPreviewProps = Readonly<{
+  configFields: ReadonlyArray<AtsConfigField>;
+  locale: CoreUILocale;
+}>;
+export const AtsConfigPreview = ({ configFields }: AtsConfigPreviewProps) => {
+  return (
+    <div className="ats-config-preview-content">
+      {configFields.map((field) => (
+        <AtsConfigFieldPreview key={field.id} field={field} />
+      ))}
+    </div>
+  );
+};
