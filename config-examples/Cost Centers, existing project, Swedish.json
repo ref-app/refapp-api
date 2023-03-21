@@ -1,0 +1,109 @@
+{
+  "config": {
+    "fields": [
+      {
+        "id": "intro",
+        "label-markdown": "Refapp-projektet för detta jobb har redan skapas. Använd [denna länk](http://localhost:3000/project/6yFb6zZEc4vwCnoYd) för att inspektera och modifiera dess inställningar.",
+        "label": "Refapp-projektet för detta jobb har redan skapas. Använd denna länk - http://localhost:3000/project/6yFb6zZEc4vwCnoYd för att inspektera och modifiera dess inställningar.",
+        "label-html": "<p>Refapp-projektet för detta jobb har redan skapas. Använd <a href=\"http://localhost:3000/project/6yFb6zZEc4vwCnoYd\">denna länk</a> för att inspektera och modifiera dess inställningar.</p>\n",
+        "label-class": "info",
+        "type": "subheader"
+      },
+      {
+        "id": "form-sv-informational-SxCbpoS3E9Ybo7HGN",
+        "label": "Svenska frågor",
+        "type": "text",
+        "value": "Refapp standardmall - snabb (11 frågor)",
+        "disabled": true
+      },
+      {
+        "id": "form-en-informational-7XyHEeEt7Q9AK6rXv",
+        "label": "Engelska frågor",
+        "type": "text",
+        "value": "Refapp standard form - quick (11 frågor)",
+        "disabled": true
+      },
+      {
+        "id": "intro-ref-req",
+        "label": "Refapp automatik",
+        "type": "header"
+      },
+      {
+        "id": "referee-requests-choice",
+        "label": "Be kandidaterna om referenser via:",
+        "type": "select",
+        "value": "disabled",
+        "options": [
+          {
+            "id": "disabled",
+            "label": "Lägg till referenser manuellt i Refapp"
+          },
+          {
+            "id": "sms",
+            "label": "SMS"
+          },
+          {
+            "id": "email",
+            "label": "mail"
+          },
+          {
+            "id": "email-sms",
+            "label": "mail och SMS"
+          }
+        ]
+      },
+      {
+        "id": "num-referees-requested",
+        "label": "Begärda referenser",
+        "type": "select",
+        "options": [
+          {
+            "id": "1",
+            "label": "1 referens"
+          },
+          {
+            "id": "2",
+            "label": "2 referenser"
+          },
+          {
+            "id": "3",
+            "label": "3 referenser"
+          },
+          {
+            "id": "4",
+            "label": "4 referenser"
+          },
+          {
+            "id": "5",
+            "label": "5 referenser"
+          }
+        ],
+        "value": "3"
+      },
+      {
+        "id": "referee-communication-automation",
+        "label": "När en kandidat har angett en referens, skicka automatiskt ut referenstagning via:",
+        "type": "select",
+        "value": "email-sms",
+        "options": [
+          {
+            "id": "disabled",
+            "label": "Skicka ut referenstagningen manuellt i Refapp"
+          },
+          {
+            "id": "sms",
+            "label": "SMS"
+          },
+          {
+            "id": "email",
+            "label": "mail"
+          },
+          {
+            "id": "email-sms",
+            "label": "mail och SMS"
+          }
+        ]
+      }
+    ]
+  }
+}

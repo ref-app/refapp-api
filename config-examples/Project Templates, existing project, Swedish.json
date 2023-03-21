@@ -1,0 +1,33 @@
+{
+  "config": {
+    "fields": [
+      {
+        "id": "intro",
+        "label-markdown": "Refapp-projektet för detta jobb har redan skapas. Använd [denna länk](http://localhost:3000/project/6yFb6zZEc4vwCnoYd) för att inspektera och modifiera dess inställningar.",
+        "label": "Refapp-projektet för detta jobb har redan skapas. Använd denna länk - http://localhost:3000/project/6yFb6zZEc4vwCnoYd för att inspektera och modifiera dess inställningar.",
+        "label-html": "<p>Refapp-projektet för detta jobb har redan skapas. Använd <a href=\"http://localhost:3000/project/6yFb6zZEc4vwCnoYd\">denna länk</a> för att inspektera och modifiera dess inställningar.</p>\n",
+        "label-class": "info",
+        "type": "subheader"
+      },
+      {
+        "id": "external-recruitment-enabled",
+        "type": "paragraph",
+        "label": "Externrekrytering för "
+      },
+      {
+        "id": "form-sv-informational-SxCbpoS3E9Ybo7HGN",
+        "label": "Svenska frågor",
+        "type": "text",
+        "value": "Refapp standardmall - snabb (11 frågor)",
+        "disabled": true
+      },
+      {
+        "id": "form-en-informational-7XyHEeEt7Q9AK6rXv",
+        "label": "Engelska frågor",
+        "type": "text",
+        "value": "Refapp standard form - quick (11 frågor)",
+        "disabled": true
+      }
+    ]
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "config": {
+    "fields": [
+      {
+        "id": "project-template-id",
+        "label": "Use this project template for all settings",
+        "type": "select",
+        "options": [
+          {
+            "id": "6EBSWgQFMAJKpxBTY",
+            "label": "Project Template 1"
+          },
+          {
+            "id": "7DvDvkBiFWHkpgknp",
+            "label": "Project Template 2"
+          }
+        ],
+        "value": "6EBSWgQFMAJKpxBTY"
+      }
+    ]
+  }
+}

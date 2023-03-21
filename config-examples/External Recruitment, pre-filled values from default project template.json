@@ -1,0 +1,166 @@
+{
+  "config": {
+    "fields": [
+      {
+        "id": "intro",
+        "label": "The settings below will be used when a Refapp project is created to match the Generic ATS for test job.\nThis happens when a reference check is started for the first candidate for the position.",
+        "type": "header",
+        "disabled": true
+      },
+      {
+        "id": "hide-project-name",
+        "type": "checkbox",
+        "label": "Hide the position name",
+        "value": false
+      },
+      {
+        "id": "external-recruitment-enabled",
+        "type": "checkbox",
+        "label": "External Recruitment",
+        "value": true
+      },
+      {
+        "id": "external-recruitment-customer",
+        "type": "text",
+        "label": "Client Name",
+        "disabled": false,
+        "value": "Client, Inc"
+      },
+      {
+        "id": "external-recruitment-hide-customer",
+        "type": "checkbox",
+        "label": "Hide the client name",
+        "value": false
+      },
+      {
+        "id": "form-sv",
+        "label": "Swedish Questions",
+        "placeholder": "Select questions to ask referees that communicate in Swedish",
+        "type": "select",
+        "options": [
+          {
+            "id": "",
+            "label": "None"
+          },
+          {
+            "id": "av75M9FFQNTD2ZY7y",
+            "label": "Refapp standardmall - djupgående (21 questions)"
+          },
+          {
+            "id": "3H9hjjoqNcZ3MFgrw",
+            "label": "Refapp standardmall - snabb (11 questions)"
+          }
+        ],
+        "value": "av75M9FFQNTD2ZY7y"
+      },
+      {
+        "id": "form-en",
+        "label": "English Questions",
+        "placeholder": "Select questions to ask referees that communicate in English",
+        "type": "select",
+        "options": [
+          {
+            "id": "",
+            "label": "None"
+          },
+          {
+            "id": "aF2nsp789ZB2wi7BW",
+            "label": "Refapp standard form - deep (21 questions)"
+          },
+          {
+            "id": "bWPKA6SDiJqrgj4p3",
+            "label": "Refapp standard form - quick (11 questions)"
+          }
+        ],
+        "value": "aF2nsp789ZB2wi7BW"
+      },
+      {
+        "id": "relation-verification",
+        "type": "checkbox",
+        "label": "Request details on relationship from candidates and referees",
+        "value": false
+      },
+      {
+        "id": "intro-ref-req",
+        "label": "Refapp Automation",
+        "type": "header"
+      },
+      {
+        "id": "referee-requests-choice",
+        "label": "Ask candidates for referees via:",
+        "type": "select",
+        "value": "email",
+        "options": [
+          {
+            "id": "disabled",
+            "label": "Add referees manually in Refapp"
+          },
+          {
+            "id": "sms",
+            "label": "SMS"
+          },
+          {
+            "id": "email",
+            "label": "email"
+          },
+          {
+            "id": "email-sms",
+            "label": "email and SMS"
+          }
+        ]
+      },
+      {
+        "id": "num-referees-requested",
+        "label": "Requested referees",
+        "type": "select",
+        "options": [
+          {
+            "id": "1",
+            "label": "1 referee"
+          },
+          {
+            "id": "2",
+            "label": "2 referees"
+          },
+          {
+            "id": "3",
+            "label": "3 referees"
+          },
+          {
+            "id": "4",
+            "label": "4 referees"
+          },
+          {
+            "id": "5",
+            "label": "5 referees"
+          }
+        ],
+        "value": "2"
+      },
+      {
+        "id": "referee-communication-automation",
+        "label": "When a candidate has submitted a referee, automatically send a reference check via:",
+        "type": "select",
+        "value": "disabled",
+        "options": [
+          {
+            "id": "disabled",
+            "label": "Send the reference check manually from Refapp"
+          },
+          {
+            "id": "sms",
+            "label": "SMS"
+          },
+          {
+            "id": "email",
+            "label": "email"
+          },
+          {
+            "id": "email-sms",
+            "label": "email and SMS"
+          }
+        ]
+      }
+    ]
+  }
+}
