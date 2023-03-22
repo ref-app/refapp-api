@@ -63,7 +63,7 @@ export const AtsConfigFieldPreview = ({
     case "subheader":
     case "paragraph":
       return field["label-markdown"] ? (
-        <Typography>
+        <Typography component="div">
           <MuiMarkdown>{field["label-markdown"]}</MuiMarkdown>
         </Typography>
       ) : (
