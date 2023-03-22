@@ -17,6 +17,7 @@ import {
   RefappConfigFieldType,
 } from "./lib/ats-types";
 import { assertIsNever } from "./lib/typehelpers";
+import MuiMarkdown from "mui-markdown";
 
 const textVariantFromFieldType = (
   fieldType: Exclude<RefappConfigFieldType, HtmlConfigFieldType>
@@ -59,7 +60,11 @@ export const AtsConfigFieldPreview = ({
     case "header":
     case "subheader":
     case "paragraph":
-      return (
+      return field["label-markdown"] ? (
+        <Typography>
+          <MuiMarkdown>{field["label-markdown"]}</MuiMarkdown>
+        </Typography>
+      ) : (
         <Typography variant={textVariantFromFieldType(field.type)}>
           {field.label}
         </Typography>

@@ -1,4 +1,12 @@
-import { Box, MenuItem, Select, Typography } from "@mui/material";
+import { Theme } from "@emotion/react";
+import {
+  Box,
+  createTheme,
+  MenuItem,
+  Select,
+  ThemeProvider,
+  Typography,
+} from "@mui/material";
 import * as React from "react";
 import { AtsConfigPreview } from "./AtsConfigPreview";
 import { RefappAtsConfig } from "./lib/ats-types";
@@ -15,9 +23,22 @@ const configFiles = [
   "Project Templates.json",
 ] as const;
 
+const createOurTheme = (): Theme => {
+  return createTheme({
+    typography: {
+      fontFamily: "Ubuntu, sans-serif",
+      h1: { fontSize: 20 },
+      h2: { fontSize: 18 },
+      h3: { fontSize: 16 },
+      h4: { fontSize: 14 },
+    },
+  });
+};
+
 export default function App() {
   const [atsConfigFile, setAtsConfigFile] = React.useState<string>();
   const [atsConfig, setAtsConfig] = React.useState<RefappAtsConfig>();
+  const theme = React.useMemo(() => createOurTheme(), []);
 
   React.useEffect(() => {
     if (!atsConfigFile) {
@@ -35,20 +56,24 @@ export default function App() {
   }, [atsConfigFile]);
 
   return (
-    <Box display="flex" flexDirection="column" gap={2}>
-      <Typography variant="h1">Refapp configuration UI sample</Typography>
-      <Select
-        value={atsConfigFile}
-        onChange={(e) => setAtsConfigFile(e.target.value)}
-      >
-        {configFiles.map((f) => (
-          <MenuItem key={f} value={f}>
-            {f}
-          </MenuItem>
-        ))}
-      </Select>
+    <ThemeProvider theme={theme}>
+      <Box display="flex" flexDirection="column" gap={2}>
+        <Typography variant="h1">Refapp configuration UI sample</Typography>
+        <Select
+          value={atsConfigFile}
+          onChange={(e) => setAtsConfigFile(e.target.value)}
+        >
+          {configFiles.map((f) => (
+            <MenuItem key={f} value={f}>
+              {f}
+            </MenuItem>
+          ))}
+        </Select>
 
-      {atsConfig && <AtsConfigPreview configFields={atsConfig.config.fields} />}
-    </Box>
+        {atsConfig && (
+          <AtsConfigPreview configFields={atsConfig.config.fields} />
+        )}
+      </Box>
+    </ThemeProvider>
   );
 }
