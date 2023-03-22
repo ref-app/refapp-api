@@ -18,7 +18,7 @@ export default function App() {
 
   return (
     <div>
-      <h1>Hello from Refapp!</h1>
+      <h1>Refapp configuration UI sample</h1>
       {atsConfig && <AtsConfigPreview configFields={atsConfig.config.fields} />}
     </div>
   );
