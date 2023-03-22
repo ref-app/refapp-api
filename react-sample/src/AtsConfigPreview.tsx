@@ -1,7 +1,9 @@
 import {
   Box,
   Checkbox,
+  FormControl,
   FormControlLabel,
+  InputLabel,
   MenuItem,
   Select,
   TextField,
@@ -71,19 +73,22 @@ export const AtsConfigFieldPreview = ({
       );
     case "select":
       return field.options ? (
-        <Select
-          label={field.label}
-          value={_.isString(value) ? value : ""}
-          disabled={field.disabled}
-          onChange={(e) => setValue(e.target.value)}
-        >
-          {field.options.map((option) => (
-            // No support for optgroups
-            <MenuItem key={option.id} value={option.id}>
-              {option.label}
-            </MenuItem>
-          ))}
-        </Select>
+        <FormControl sx={{ m: 1, minWidth: 120 }}>
+          <InputLabel id={field.id}>{field.label}</InputLabel>
+          <Select
+            label={field.label}
+            value={_.isString(value) ? value : ""}
+            disabled={field.disabled}
+            onChange={(e) => setValue(e.target.value)}
+          >
+            {field.options.map((option) => (
+              // No support for optgroups
+              <MenuItem key={option.id} value={option.id}>
+                {option.label}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
       ) : null;
     case "text":
       return (
