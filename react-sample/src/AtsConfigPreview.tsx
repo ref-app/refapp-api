@@ -1,7 +1,21 @@
-import { Checkbox, FormControlLabel, MenuItem, Select, TextField, Typography, TypographyProps } from "@mui/material";
+import {
+  Box,
+  Checkbox,
+  FormControlLabel,
+  MenuItem,
+  Select,
+  TextField,
+  Typography,
+  TypographyProps,
+} from "@mui/material";
 import * as React from "react";
 import * as _ from "lodash";
-import { AtsConfigField, AtsConfigFieldValue, HtmlConfigFieldType, RefappConfigFieldType } from "./lib/ats-types";
+import {
+  AtsConfigField,
+  AtsConfigFieldValue,
+  HtmlConfigFieldType,
+  RefappConfigFieldType,
+} from "./lib/ats-types";
 import { assertIsNever } from "./lib/typehelpers";
 
 const textVariantFromFieldType = (
@@ -56,7 +70,7 @@ export const AtsConfigFieldPreview = ({
           label={field.label}
           value={_.isString(value) ? value : ""}
           disabled={field.disabled}
-          onChange={e=>setValue(e.target.value)}
+          onChange={(e) => setValue(e.target.value)}
         >
           {field.options.map((option) => (
             // No support for optgroups
@@ -82,14 +96,13 @@ export const AtsConfigFieldPreview = ({
 
 type AtsConfigPreviewProps = Readonly<{
   configFields: ReadonlyArray<AtsConfigField>;
-  locale: string;
 }>;
 export const AtsConfigPreview = ({ configFields }: AtsConfigPreviewProps) => {
   return (
-    <div className="ats-config-preview-content">
+    <Box display="flex" flexDirection="column" gap={2}>
       {configFields.map((field) => (
         <AtsConfigFieldPreview key={field.id} field={field} />
       ))}
-    </div>
+    </Box>
   );
 };
