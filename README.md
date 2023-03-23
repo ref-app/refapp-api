@@ -9,4 +9,4 @@ The [react-sample](./react-sample/) directory contains a small project that rend
 
 You can run it locally after cloning this repository or 
 
-[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/ref-app/refapp-api/tree/main/react-sample)
+[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/fork/github/ref-app/refapp-api/tree/main/react-sample)
