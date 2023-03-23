@@ -56,7 +56,7 @@ const TextContainer = ({
   if (severity) {
     return <Alert severity={severity}>{children}</Alert>;
   }
-  return <>{children}</>;
+  return <React.Fragment>{children}</React.Fragment>;
 };
 
 type AtsConfigFieldPreviewProps = Readonly<{
