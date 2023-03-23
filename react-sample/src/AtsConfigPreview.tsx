@@ -20,7 +20,6 @@ import {
   HtmlConfigFieldType,
   InfoClass,
   RefappConfigFieldType,
-  RefappLabelFieldTypes,
 } from "./lib/ats-types";
 import { assertIsNever } from "./lib/typehelpers";
 import MuiMarkdown from "mui-markdown";
