@@ -1,4 +1,6 @@
 import {
+  Alert,
+  AlertProps,
   Box,
   Checkbox,
   FormControl,
@@ -16,23 +18,45 @@ import {
   AtsConfigField,
   AtsConfigFieldValue,
   HtmlConfigFieldType,
+  InfoClass,
   RefappConfigFieldType,
+  RefappLabelFieldTypes,
 } from "./lib/ats-types";
 import { assertIsNever } from "./lib/typehelpers";
 import MuiMarkdown from "mui-markdown";
+
+const toSeverity = (value: InfoClass | undefined): AlertProps["severity"] => {
+  if (!value || value === "default") {
+    return undefined;
+  }
+  return value;
+};
 
 const textVariantFromFieldType = (
   fieldType: Exclude<RefappConfigFieldType, HtmlConfigFieldType>
 ): TypographyProps["variant"] => {
   switch (fieldType) {
     case "header":
-      return "h4";
+      return "h3";
     case "subheader":
-      return "h5";
+      return "h4";
     case "paragraph":
       return "body1";
   }
   return assertIsNever(fieldType);
+};
+
+const TextContainer = ({
+  labelClass,
+  children,
+}: React.PropsWithChildren<{
+  labelClass: InfoClass;
+}>) => {
+  const severity = toSeverity(labelClass);
+  if (severity) {
+    return <Alert severity={severity}>{children}</Alert>;
+  }
+  return <>{children}</>;
 };
 
 type AtsConfigFieldPreviewProps = Readonly<{
@@ -62,14 +86,20 @@ export const AtsConfigFieldPreview = ({
     case "header":
     case "subheader":
     case "paragraph":
-      return field["label-markdown"] ? (
-        <Typography component="div">
-          <MuiMarkdown>{field["label-markdown"]}</MuiMarkdown>
-        </Typography>
-      ) : (
-        <Typography variant={textVariantFromFieldType(field.type)}>
-          {field.label}
-        </Typography>
+      return (
+        <Box p={2}>
+          <TextContainer labelClass={field["label-class"]}>
+            {field["label-markdown"] ? (
+              <Typography component="div">
+                <MuiMarkdown>{field["label-markdown"]}</MuiMarkdown>
+              </Typography>
+            ) : (
+              <Typography variant={textVariantFromFieldType(field.type)}>
+                {field.label}
+              </Typography>
+            )}
+          </TextContainer>
+        </Box>
       );
     case "select":
       return field.options ? (

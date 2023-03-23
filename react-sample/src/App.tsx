@@ -29,10 +29,10 @@ const createOurTheme = (): Theme => {
   return createTheme({
     typography: {
       fontFamily: "Ubuntu, sans-serif",
-      h1: { fontSize: 20 },
-      h2: { fontSize: 18 },
-      h3: { fontSize: 16 },
-      h4: { fontSize: 14 },
+      h1: { fontSize: 22 },
+      h2: { fontSize: 20 },
+      h3: { fontSize: 18 },
+      h4: { fontSize: 16 },
     },
   });
 };
@@ -50,11 +50,25 @@ export default function App() {
       `https://raw.githubusercontent.com/ref-app/refapp-api/main/config-examples/${encodeURIComponent(
         atsConfigFile
       )}`
-    ).then((response) => {
-      response.json().then((config) => {
-        setAtsConfig(config);
-      });
-    });
+    ).then(
+      (response) => {
+        response.json().then((config) => {
+          setAtsConfig(config);
+        });
+      },
+      (err: any) =>
+        setAtsConfig({
+          config: {
+            fields: [
+              {
+                id: "error",
+                type: "text",
+                label: err.message ?? "An error occurred",
+              },
+            ],
+          },
+        })
+    );
   }, [atsConfigFile]);
 
   return (
