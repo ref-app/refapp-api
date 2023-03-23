@@ -3,40 +3,40 @@
     "fields": [
       {
         "id": "intro",
-        "label-markdown": "Refapp-projektet för detta jobb har redan skapas. Använd [denna länk](http://localhost:3000/project/ehQgddv35NCCP5tdR) för att inspektera och modifiera dess inställningar.",
-        "label": "Refapp-projektet för detta jobb har redan skapas. Använd denna länk - http://localhost:3000/project/ehQgddv35NCCP5tdR för att inspektera och modifiera dess inställningar.",
-        "label-html": "<p>Refapp-projektet för detta jobb har redan skapas. Använd <a href=\"http://localhost:3000/project/ehQgddv35NCCP5tdR\">denna länk</a> för att inspektera och modifiera dess inställningar.</p>\n",
+        "label-markdown": "The Refapp project for this job has already been created. Use [this link](http://localhost:3000/project/ehQgddv35NCCP5tdR) to view it and modify its settings.",
+        "label": "The Refapp project for this job has already been created. Use this link - http://localhost:3000/project/ehQgddv35NCCP5tdR to view it and modify its settings.",
+        "label-html": "<p>The Refapp project for this job has already been created. Use <a href=\"http://localhost:3000/project/ehQgddv35NCCP5tdR\">this link</a> to view it and modify its settings.</p>\n",
         "label-class": "info",
         "type": "subheader"
       },
       {
         "id": "form-sv-informational-jQiva42EbAsAgzGDn",
-        "label": "Svenska frågor",
+        "label": "Swedish Questions",
         "type": "text",
-        "value": "Refapp standardmall - snabb (11 frågor)",
+        "value": "Refapp standardmall - snabb (11 questions)",
         "disabled": true
       },
       {
         "id": "form-en-informational-q2JXxT74R73rcLSau",
-        "label": "Engelska frågor",
+        "label": "English Questions",
         "type": "text",
-        "value": "Refapp standard form - quick (11 frågor)",
+        "value": "Refapp standard form - quick (11 questions)",
         "disabled": true
       },
       {
         "id": "intro-ref-req",
-        "label": "Refapp automatik",
+        "label": "Refapp Automation",
         "type": "header"
       },
       {
         "id": "referee-requests-choice",
-        "label": "Be kandidaterna om referenser via:",
+        "label": "Ask candidates for referees via:",
         "type": "select",
         "value": "disabled",
         "options": [
           {
             "id": "disabled",
-            "label": "Lägg till referenser manuellt i Refapp"
+            "label": "Add referees manually in Refapp"
           },
           {
             "id": "sms",
@@ -44,51 +44,51 @@
           },
           {
             "id": "email",
-            "label": "mail"
+            "label": "email"
           },
           {
             "id": "email-sms",
-            "label": "mail och SMS"
+            "label": "email and SMS"
           }
         ]
       },
       {
         "id": "num-referees-requested",
-        "label": "Begärda referenser",
+        "label": "Requested referees",
         "type": "select",
         "options": [
           {
             "id": "1",
-            "label": "1 referens"
+            "label": "1 referee"
           },
           {
             "id": "2",
-            "label": "2 referenser"
+            "label": "2 referees"
           },
           {
             "id": "3",
-            "label": "3 referenser"
+            "label": "3 referees"
           },
           {
             "id": "4",
-            "label": "4 referenser"
+            "label": "4 referees"
           },
           {
             "id": "5",
-            "label": "5 referenser"
+            "label": "5 referees"
           }
         ],
         "value": "3"
       },
       {
         "id": "referee-communication-automation",
-        "label": "När en kandidat har angett en referens, skicka automatiskt ut referenstagning via:",
+        "label": "When a candidate has submitted a referee, automatically send a reference check via:",
         "type": "select",
         "value": "email-sms",
         "options": [
           {
             "id": "disabled",
-            "label": "Skicka ut referenstagningen manuellt i Refapp"
+            "label": "Send the reference check manually from Refapp"
           },
           {
             "id": "sms",
@@ -96,11 +96,11 @@
           },
           {
             "id": "email",
-            "label": "mail"
+            "label": "email"
           },
           {
             "id": "email-sms",
-            "label": "mail och SMS"
+            "label": "email and SMS"
           }
         ]
       }

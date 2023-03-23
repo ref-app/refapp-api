@@ -1,0 +1,33 @@
+{
+  "config": {
+    "fields": [
+      {
+        "id": "intro",
+        "label-markdown": "The Refapp project for this job has already been created. Use [this link](http://localhost:3000/project/ehQgddv35NCCP5tdR) to view it and modify its settings.",
+        "label": "The Refapp project for this job has already been created. Use this link - http://localhost:3000/project/ehQgddv35NCCP5tdR to view it and modify its settings.",
+        "label-html": "<p>The Refapp project for this job has already been created. Use <a href=\"http://localhost:3000/project/ehQgddv35NCCP5tdR\">this link</a> to view it and modify its settings.</p>\n",
+        "label-class": "info",
+        "type": "subheader"
+      },
+      {
+        "id": "external-recruitment-enabled",
+        "type": "paragraph",
+        "label": "External Recruitment for "
+      },
+      {
+        "id": "form-sv-informational-jQiva42EbAsAgzGDn",
+        "label": "Swedish Questions",
+        "type": "text",
+        "value": "Refapp standardmall - snabb (11 questions)",
+        "disabled": true
+      },
+      {
+        "id": "form-en-informational-q2JXxT74R73rcLSau",
+        "label": "English Questions",
+        "type": "text",
+        "value": "Refapp standard form - quick (11 questions)",
+        "disabled": true
+      }
+    ]
+  }
+}

@@ -43,15 +43,15 @@
             "label": "None"
           },
           {
-            "id": "av75M9FFQNTD2ZY7y",
+            "id": "updWZi8zvwYnFhjBN",
             "label": "Refapp standardmall - djupgående (21 questions)"
           },
           {
-            "id": "3H9hjjoqNcZ3MFgrw",
+            "id": "DfMw5jAhXjNGaqYtz",
             "label": "Refapp standardmall - snabb (11 questions)"
           }
         ],
-        "value": "av75M9FFQNTD2ZY7y"
+        "value": "updWZi8zvwYnFhjBN"
       },
       {
         "id": "form-en",
@@ -64,15 +64,15 @@
             "label": "None"
           },
           {
-            "id": "aF2nsp789ZB2wi7BW",
+            "id": "dBASGFFJcjdfywMZr",
             "label": "Refapp standard form - deep (21 questions)"
           },
           {
-            "id": "bWPKA6SDiJqrgj4p3",
+            "id": "gXHKpaeJTJv4EqK6x",
             "label": "Refapp standard form - quick (11 questions)"
           }
         ],
-        "value": "aF2nsp789ZB2wi7BW"
+        "value": "dBASGFFJcjdfywMZr"
       },
       {
         "id": "relation-verification",

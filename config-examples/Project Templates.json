@@ -7,15 +7,15 @@
         "type": "select",
         "options": [
           {
-            "id": "6EBSWgQFMAJKpxBTY",
+            "id": "dps2LmEbZFXN2r5uv",
             "label": "Project Template 1"
           },
           {
-            "id": "7DvDvkBiFWHkpgknp",
+            "id": "2aBcnSSABEGJPejwg",
             "label": "Project Template 2"
           }
         ],
-        "value": "6EBSWgQFMAJKpxBTY"
+        "value": "dps2LmEbZFXN2r5uv"
       }
     ]
   }

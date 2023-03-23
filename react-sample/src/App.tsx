@@ -16,9 +16,11 @@ import "./style.css";
  * From the config-examples directory in this repository
  */
 const configFiles = [
+  "Cost Centers, existing project, English.json",
   "Cost Centers, existing project, Swedish.json",
   "Cost Centers.json",
   "External Recruitment, pre-filled values from default project template.json",
+  "Project Templates, existing project, English.json",
   "Project Templates, existing project, Swedish.json",
   "Project Templates.json",
 ] as const;
