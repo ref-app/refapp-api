@@ -229,6 +229,11 @@ export interface CandidateAttachment {
   description: string;
 }
 
+export type FraudWarningType =
+  | "same-ip-address"
+  | "same-email-address"
+  | "same-phone-number";
+
 export interface CandidateAssessment {
   /**
    * Refapp Addition to specify the kind of assessment
@@ -249,6 +254,11 @@ export interface CandidateAssessment {
    * For reference checking, the number of referees that have submitted their answers
    */
   completed?: number;
+  /**
+   * Refapp Addition
+   * A list of unique codes that might indicate fraud
+   */
+  fraudWarnings?: FraudWarningType[];
 }
 
 export interface CandidateResults {
