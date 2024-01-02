@@ -49,9 +49,10 @@ const createOurTheme = (): Theme => {
     typography: {
       fontFamily: "Ubuntu, sans-serif",
       h1: { fontSize: 22 },
-      h2: { fontSize: 20 },
-      h3: { fontSize: 18 },
-      h4: { fontSize: 16 },
+      // Originally style of h5, repurposed here for h2 (Refapp config "header")
+      h2: { fontSize: "1.5rem", lineHeight: 1.334, fontWeight: 400 },
+      // Match size of body1, but make bold (Refapp config "subheader")
+      h3: { fontSize: "1rem", lineHeight: 1.5, fontWeight: 600 },
     },
     palette: {
       primary: {

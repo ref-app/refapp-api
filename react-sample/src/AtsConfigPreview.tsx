@@ -37,9 +37,9 @@ const textVariantFromFieldType = (
 ): TypographyProps["variant"] => {
   switch (fieldType) {
     case "header":
-      return "h3";
+      return "h2";
     case "subheader":
-      return "h4";
+      return "h3";
     case "paragraph":
       return "body1";
   }
@@ -93,19 +93,17 @@ export const AtsConfigFieldPreview = ({
     case "subheader":
     case "paragraph":
       return (
-        <Box p={2}>
           <TextContainer labelClass={field["label-class"]}>
             {field["label-markdown"] ? (
               <Typography component="div">
                 <MuiMarkdown>{field["label-markdown"]}</MuiMarkdown>
               </Typography>
             ) : (
-              <Typography variant={textVariantFromFieldType(field.type)}>
+              <Typography sx={{ mx: 1}} variant={textVariantFromFieldType(field.type)}>
                 {field.label}
               </Typography>
             )}
           </TextContainer>
-        </Box>
       );
     case "select":
       return field.options ? (
