@@ -123,7 +123,6 @@ const fetchFromRefapp = async (
     if (!response.ok) {
       return createConfigError(config.message);
     }
-    console.info("Config from Refapp", config);
     return config;
   } catch (e) {
     return createConfigError(e.message);
@@ -163,8 +162,8 @@ const submitLive = async (
     const response = await fetch(postEndpoint, {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${atsSecret}`,
-        "Content-Type": "application/json"
+        "Authorization": `Bearer ${atsSecret}`,
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({
         "partner-event": {
@@ -251,6 +250,12 @@ export default function App() {
     ).then((result) => setSubmitResults(result));
   };
 
+  const onReset = () => {
+    console.log("onReset");
+    setSubmitResults("");
+    setResetTrigger((count) => count + 1);
+  };
+
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
@@ -335,13 +340,13 @@ export default function App() {
               {configMethod === "live" ? (
                 <AtsConfigPreview
                   configFields={atsConfig.config.fields}
-                  onReset={() => setResetTrigger((count) => count + 1)}
+                  onReset={onReset}
                   onSubmit={handleSubmit}
                 />
               ) : (
                 <AtsConfigPreview
                   configFields={atsConfig.config.fields}
-                  onReset={() => setResetTrigger((count) => count + 1)}
+                  onReset={onReset}
                 />
               )}
             </CardContent>
@@ -349,8 +354,19 @@ export default function App() {
         )}
 
         {submitResults && (
-          <Card sx={{ mt: 2}}>
-            <Box sx={{whiteSpace: "pre", m: 2, p: 1, bgcolor: "grey.50", borderColor: "grey.300", borderWidth: 1, borderStyle: "solid", fontFamily: "monospace"}}>
+          <Card sx={{ mt: 2 }}>
+            <Box
+              sx={{
+                whiteSpace: "pre",
+                m: 2,
+                p: 1,
+                bgcolor: "grey.50",
+                borderColor: "grey.300",
+                borderWidth: 1,
+                borderStyle: "solid",
+                fontFamily: "monospace",
+              }}
+            >
               {submitResults}
             </Box>
           </Card>
