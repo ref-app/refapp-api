@@ -2,6 +2,7 @@ import {
   Alert,
   AlertProps,
   Box,
+  Button,
   Checkbox,
   FormControl,
   FormControlLabel,
@@ -36,9 +37,9 @@ const textVariantFromFieldType = (
 ): TypographyProps["variant"] => {
   switch (fieldType) {
     case "header":
-      return "h3";
+      return "h2";
     case "subheader":
-      return "h4";
+      return "h3";
     case "paragraph":
       return "body1";
   }
@@ -68,13 +69,19 @@ export const AtsConfigFieldPreview = ({
     field.value
   );
 
+  React.useEffect(() => {
+    setValue(field.value);
+  }, [field]);
+
   switch (field.type) {
     case "checkbox":
       return (
         <FormControlLabel
+          sx={{ mx: 1, minWidth: 120 }}
           label={field.label}
           control={
             <Checkbox
+              name={field.id}
               disabled={field.disabled}
               checked={_.isBoolean(value) ? value : false}
               onChange={(e) => setValue(e.target.checked)}
@@ -86,25 +93,24 @@ export const AtsConfigFieldPreview = ({
     case "subheader":
     case "paragraph":
       return (
-        <Box p={2}>
           <TextContainer labelClass={field["label-class"]}>
             {field["label-markdown"] ? (
               <Typography component="div">
                 <MuiMarkdown>{field["label-markdown"]}</MuiMarkdown>
               </Typography>
             ) : (
-              <Typography variant={textVariantFromFieldType(field.type)}>
+              <Typography sx={{ mx: 1}} variant={textVariantFromFieldType(field.type)}>
                 {field.label}
               </Typography>
             )}
           </TextContainer>
-        </Box>
       );
     case "select":
       return field.options ? (
         <FormControl sx={{ m: 1, minWidth: 120 }}>
           <InputLabel id={field.id}>{field.label}</InputLabel>
           <Select
+            name={field.id}
             label={field.label}
             value={_.isString(value) ? value : ""}
             disabled={field.disabled}
@@ -122,6 +128,8 @@ export const AtsConfigFieldPreview = ({
     case "text":
       return (
         <TextField
+          name={field.id}
+          sx={{ m: 1, minWidth: 120 }}
           disabled={field.disabled}
           label={field.label}
           value={_.isString(value) ? value : ""}
@@ -135,13 +143,39 @@ export const AtsConfigFieldPreview = ({
 
 type AtsConfigPreviewProps = Readonly<{
   configFields: ReadonlyArray<AtsConfigField>;
+  onReset: () => void;
+  onSubmit?: (data: FormData) => void;
 }>;
-export const AtsConfigPreview = ({ configFields }: AtsConfigPreviewProps) => {
+export const AtsConfigPreview = ({
+  configFields,
+  onReset,
+  onSubmit,
+}: AtsConfigPreviewProps) => {
   return (
-    <Box display="flex" flexDirection="column" gap={2}>
+    <Box
+      display="flex"
+      flexDirection="column"
+      gap={2}
+      mb={0}
+      component={"form"}
+    >
       {configFields.map((field) => (
         <AtsConfigFieldPreview key={field.id} field={field} />
       ))}
+      <Box display="flex" gap={2} mx={1}>
+        {onSubmit && (
+          <Button
+            variant="contained"
+            sx={{ flexGrow: 1 }}
+            onClick={() => onSubmit(new FormData(document.forms[0]))}
+          >
+            Submit
+          </Button>
+        )}
+        <Button sx={{ flexGrow: 1 }} onClick={() => onReset()}>
+          Reset
+        </Button>
+      </Box>
     </Box>
   );
 };
