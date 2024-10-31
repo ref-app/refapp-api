@@ -95,6 +95,14 @@ export interface AtsRecruiter {
   "phone"?: string;
   /**
    * Refapp Addition
+   * Optional field that will be merged with `phone` to become the final unique
+   * telephone number. For systems where the country calling code is stored
+   * separate from the rest of the number.
+   * Example value: "+46".
+   */
+  "country-calling-code"?: string;
+  /**
+   * Refapp Addition
    * Link to the entity in the ATS to send the
    * user back from the external system
    */
@@ -145,6 +153,13 @@ export interface AtsJob {
    * variation/version of an ATS being used.
    */
   "ats-name"?: string;
+  /**
+   * Refapp Addition
+   * Set the description field in Refapp. This is shown as a note inside the
+   * Refapp UI without ever being shown to candidates and/or referees. Can be
+   * used to make it easier to find a specific project in the list.
+   */
+  "description"?: string;
 }
 
 export interface AtsReferee {
@@ -152,6 +167,14 @@ export interface AtsReferee {
   "last-name": string;
   "email"?: string;
   "phone"?: string;
+  /**
+   * Refapp Addition
+   * Optional field that will be merged with `phone` to become the final unique
+   * telephone number. For systems where the country calling code is stored
+   * separate from the rest of the number.
+   * Example value: "+46".
+   */
+  "country-calling-code"?: string;
   /**
    * The language used to communicate with the candidate
    * Two letter ISO 639-1 (preferred) with fallback to three letter ISO 639-2
@@ -170,6 +193,14 @@ export interface AtsCandidate {
   "last-name": string;
   "email": string;
   "phone"?: string;
+  /**
+   * Refapp Addition
+   * Optional field that will be merged with `phone` to become the final unique
+   * telephone number. For systems where the country calling code is stored
+   * separate from the rest of the number.
+   * Example value: "+46".
+   */
+  "country-calling-code"?: string;
   /**
    * Refapp Addition.
    * List of referees to add for the candidate
