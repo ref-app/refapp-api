@@ -126,14 +126,6 @@ const atsRecruiterSchema = z.object({
   "country-calling-code": z.ostring(),
   /**
    * Refapp Addition
-   * Optional field that will be merged with `phone` to become the final unique
-   * telephone number. For systems where the country calling code is stored
-   * separate from the rest of the number.
-   * Example value: "+46".
-   */
-  "country-calling-code"?: string;
-  /**
-   * Refapp Addition
    * Link to the entity in the ATS to send the
    * user back from the external system
    */
@@ -226,14 +218,6 @@ const atsRefereeSchema = z.object({
    */
   "country-calling-code": z.ostring(),
   /**
-   * Refapp Addition
-   * Optional field that will be merged with `phone` to become the final unique
-   * telephone number. For systems where the country calling code is stored
-   * separate from the rest of the number.
-   * Example value: "+46".
-   */
-  "country-calling-code"?: string;
-  /**
    * The language used to communicate with the candidate
    * Two letter ISO 639-1 (preferred) with fallback to three letter ISO 639-2
    * A full locale (language-region) code à la Java or .NET is also allowed, e.g. en-GB
@@ -272,14 +256,6 @@ const atsCandidateSchema = z.object({
    * Example value: "+46".
    */
   "country-calling-code": z.ostring(),
-  /**
-   * Refapp Addition
-   * Optional field that will be merged with `phone` to become the final unique
-   * telephone number. For systems where the country calling code is stored
-   * separate from the rest of the number.
-   * Example value: "+46".
-   */
-  "country-calling-code"?: string;
   /**
    * Refapp Addition.
    * List of referees to add for the candidate
