@@ -1,5 +1,14 @@
-import { z } from "zod";
+import { z, type ZodTypeAny } from "zod";
 // Do not import helpers here - this file needs to be standalone (apart from zod)
+
+/**
+ * Zod helper: we only want undefined values for optional, but some integrations
+ * have been forced to use null values because of their JSON serialisation
+ * libraries. For now we will accept both null and undefined, but for our
+ * application purposes we have Zod convert all null values to undefined.
+ */
+const optionalWithNull = <T extends ZodTypeAny>(t: T) =>
+  t.nullish().transform((v) => (v === null ? undefined : v));
 
 export type InfoClass = "info" | "warning" | "error" | "success" | "default";
 
@@ -37,6 +46,7 @@ export type HtmlConfigField<T extends string> = Readonly<{
    */
   options?: ReadonlyArray<HtmlConfigOption>;
   disabled?: boolean;
+  refetch?: boolean;
 }>;
 
 /**
@@ -75,7 +85,7 @@ const atsCompanySchema = z.object({
   /**
    * Name of the company.
    */
-  "name": z.string(),
+  "name": optionalWithNull(z.string()),
   /**
    * For Teamtailor, the internal teamtailor id
    * For other systems, the "provider key" used to connect companies in the two systems
@@ -86,28 +96,28 @@ const atsCompanySchema = z.object({
    * Link to the entity in the ATS to send the
    * user back from the external system
    */
-  "ats-url": z.ostring(),
+  "ats-url": optionalWithNull(z.string()),
 });
 
 export type AtsCompany = z.infer<typeof atsCompanySchema>;
 
-const atsRecruiterSchema = z.object({
+export const atsRecruiterSchema = z.object({
   /**
    * Name of the recruiter.
    */
-  "name": z.ostring(),
+  "name": optionalWithNull(z.string()),
   /**
    * Refapp Addition
    * If first and last name are provided the are used instead of name
    * when onboarding a new user
    */
-  "first-name": z.ostring(),
+  "first-name": optionalWithNull(z.string()),
   /**
    * Refapp Addition
    * If first and last name are provided the are used instead of name
    * when onboarding a new user
    */
-  "last-name": z.ostring(),
+  "last-name": optionalWithNull(z.string()),
   /**
    * Email of the recruiter.
    */
@@ -115,7 +125,7 @@ const atsRecruiterSchema = z.object({
   /**
    * Phone number of the recruiter.
    */
-  "phone": z.ostring(),
+  "phone": optionalWithNull(z.string()),
   /**
    * Refapp Addition
    * Optional field that will be merged with `phone` to become the final unique
@@ -123,13 +133,13 @@ const atsRecruiterSchema = z.object({
    * separate from the rest of the number.
    * Example value: "+46".
    */
-  "country-calling-code": z.ostring(),
+  "country-calling-code": optionalWithNull(z.string()),
   /**
    * Refapp Addition
    * Link to the entity in the ATS to send the
    * user back from the external system
    */
-  "ats-url": z.ostring(),
+  "ats-url": optionalWithNull(z.string()),
 });
 
 export type AtsRecruiter = z.infer<typeof atsRecruiterSchema>;
@@ -148,12 +158,12 @@ const atsJobSchema = z.object({
    * Refapp Addition
    * If true, the job title is hidden from candidates and referees
    */
-  "private-title": z.oboolean(),
+  "private-title": optionalWithNull(z.boolean()),
   /**
    * Refapp Addition
    * If provided, the position is an external recruitment for a client
    */
-  "client-name": z.ostring(),
+  "client-name": optionalWithNull(z.string()),
   /**
    * Refapp Addition
    * These recruiters will be added as members to the project
@@ -161,33 +171,33 @@ const atsJobSchema = z.object({
    * If not provided, the candidate recruiter will be the only project
    * member upon creation
    */
-  "recruiting-team": z.array(atsRecruiterSchema).optional(),
+  "recruiting-team": optionalWithNull(z.array(atsRecruiterSchema)),
   /**
    * Refapp Addition
    * Link to the entity in the ATS to send the
    * user back from the external system
    */
-  "ats-url": z.ostring(),
+  "ats-url": optionalWithNull(z.string()),
   /**
    * Refapp Addition
    * Store a public RSA key to encrypt PII inside update calls.
    * Expected to be a Base64url encoded PKCS#1 DER key.
    */
-  "ats-public-key": z.ostring(),
+  "ats-public-key": optionalWithNull(z.string()),
   /**
    * Refapp Addition
    * Store a string name identifying the ATS. This is used in addition to the
    * name already associated with the ATS in Refapp. E.g. to specify the
    * variation/version of an ATS being used.
    */
-  "ats-name": z.ostring(),
+  "ats-name": optionalWithNull(z.string()),
   /**
    * Refapp Addition
    * Set the description field in Refapp. This is shown as a note inside the
    * Refapp UI without ever being shown to candidates and/or referees. Can be
    * used to make it easier to find a specific project in the list.
    */
-  "description": z.ostring(),
+  "description": optionalWithNull(z.string()),
 });
 
 export type AtsJob = z.infer<typeof atsJobSchema>;
@@ -204,11 +214,11 @@ const atsRefereeSchema = z.object({
   /**
    * Email of the referee.
    */
-  "email": z.ostring(),
+  "email": optionalWithNull(z.string()),
   /**
    * Phone number of the referee.
    */
-  "phone": z.ostring(),
+  "phone": optionalWithNull(z.string()),
   /**
    * Refapp Addition
    * Optional field that will be merged with `phone` to become the final unique
@@ -216,13 +226,13 @@ const atsRefereeSchema = z.object({
    * separate from the rest of the number.
    * Example value: "+46".
    */
-  "country-calling-code": z.ostring(),
+  "country-calling-code": optionalWithNull(z.string()),
   /**
    * The language used to communicate with the candidate
    * Two letter ISO 639-1 (preferred) with fallback to three letter ISO 639-2
    * A full locale (language-region) code à la Java or .NET is also allowed, e.g. en-GB
    */
-  "language": z.ostring(),
+  "language": optionalWithNull(z.string()),
 });
 export type AtsReferee = z.infer<typeof atsRefereeSchema>;
 
@@ -241,13 +251,13 @@ const atsCandidateSchema = z.object({
    */
   "last-name": z.string(),
   /**
-   * Email of the candidate.
+   * Email of the candidate. If not provided, only SMS can be used.
    */
-  "email": z.string(),
+  "email": optionalWithNull(z.string()),
   /**
    * Phone number of the candidate.
    */
-  "phone": z.ostring(),
+  "phone": optionalWithNull(z.string()),
   /**
    * Refapp Addition
    * Optional field that will be merged with `phone` to become the final unique
@@ -255,12 +265,12 @@ const atsCandidateSchema = z.object({
    * separate from the rest of the number.
    * Example value: "+46".
    */
-  "country-calling-code": z.ostring(),
+  "country-calling-code": optionalWithNull(z.string()),
   /**
    * Refapp Addition.
    * List of referees to add for the candidate
    */
-  "referees": z.array(atsRefereeSchema).optional(),
+  "referees": optionalWithNull(z.array(atsRefereeSchema)),
   /**
    * Recruiter associated with the candidate.
    */
@@ -275,13 +285,13 @@ const atsCandidateSchema = z.object({
    * Two letter ISO 639-1 (preferred) with fallback to three letter ISO 639-2
    * A full locale (language-region) code à la Java or .NET is also allowed, e.g. en-GB
    */
-  "language": z.ostring(),
+  "language": optionalWithNull(z.string()),
   /**
    * Refapp Addition
    * Link to the entity in the ATS to send the
    * user back from the external system
    */
-  "ats-url": z.ostring(),
+  "ats-url": optionalWithNull(z.string()),
 });
 
 export type AtsCandidate = z.infer<typeof atsCandidateSchema>;
@@ -295,9 +305,13 @@ export const atsResultStatusValues = [
 ] as const;
 export type AtsResultStatus = (typeof atsResultStatusValues)[number];
 
-const atsWebhookDataSchema = z.record(
-  z.union([z.string(), z.boolean(), z.number()])
-);
+export const atsWebhookDataValueSchema = z.union([
+  z.string(),
+  z.boolean(),
+  z.number(),
+]);
+
+const atsWebhookDataSchema = z.record(atsWebhookDataValueSchema);
 export type AtsWebhookData = z.infer<typeof atsWebhookDataSchema>;
 
 const atsPartnerEventSchema = z.object({
@@ -320,21 +334,22 @@ const atsPartnerEventSchema = z.object({
     /**
      * Status of the result.
      */
-    "status": z.enum(atsResultStatusValues),
+    "status": z.enum(atsResultStatusValues).optional(),
     /**
      * New 2022-07-05
      * If set to a url with a host name that is configured with a bearer token for the Refapp instance,
      * this url will receive PUT calls with an update payload whenever the candidate changes its state
      */
-    "update-url": z.ostring(),
+    "update-url": optionalWithNull(z.string()),
   }),
   /**
-   * Additional configuration creates from settings edited by the user through a UI created from the /config metadata
+   * Additional configuration created from settings that are edited by the user through a UI built for the /config metadata
    */
-  "webhook-data": atsWebhookDataSchema.optional(),
+  "webhook-data": optionalWithNull(atsWebhookDataSchema),
 });
 
 export type AtsPartnerEvent = z.infer<typeof atsPartnerEventSchema>;
+export type AtsPartnerEventIncoming = z.input<typeof atsPartnerEventSchema>;
 
 export const atsPartnerEventPayloadSchema = z.object({
   /**
@@ -344,6 +359,9 @@ export const atsPartnerEventPayloadSchema = z.object({
 });
 
 export type AtsPartnerEventPayload = z.infer<
+  typeof atsPartnerEventPayloadSchema
+>;
+export type AtsPartnerEventPayloadIncoming = z.input<
   typeof atsPartnerEventPayloadSchema
 >;
 
@@ -408,6 +426,12 @@ export const candidateResultsSchema = z.object({
      */
     candidateLink: candidateAttachmentSchema.optional(),
     /**
+     * Refapp Addition
+     * Link for the candidate to submit references (e.g. https://app.refapp.se/reference-entry/abcd1234)
+     * Not intended for the recruiter to see (they might click it) - only for the candidate
+     */
+    candidateSubmissionPageLink: candidateAttachmentSchema.optional(),
+    /**
      * Holds the reference checking result
      */
     assessment: candidateAssessmentSchema.optional(),
@@ -419,32 +443,4 @@ export const candidateResultsSchema = z.object({
   }),
 });
 
-export interface CandidateResults {
-  type: "partner-results";
-  id: string;
-  attributes: {
-    /**
-     * Refapp Addition
-     */
-    status: AtsResultStatus;
-    summary: string;
-    /**
-     * Link to the report
-     */
-    url?: string;
-    /**
-     * Refapp Addition
-     * Link to candidate in Refapp (e.g. https://app.refapp.se/candidate/abcd1234)
-     */
-    candidateLink?: CandidateAttachment;
-    /**
-     * Holds the reference checking result
-     */
-    assessment?: CandidateAssessment;
-    /**
-     * General field for any kind of attachment.
-     * Can be ignored by the receiving end if the candidateLink and url fields are handled.
-     */
-    attachments?: CandidateAttachment[];
-  };
-}
+export type CandidateResults = z.infer<typeof candidateResultsSchema>;
