@@ -146,7 +146,7 @@ export type AtsRecruiter = z.infer<typeof atsRecruiterSchema>;
 
 const atsJobSchema = z.object({
   /**
-   * Unique candidate id.
+   * Unique job id.
    * Expanded from Teamtailor number to number or string
    */
   "id": z.union([z.number(), z.string()]),
@@ -312,6 +312,11 @@ export const atsWebhookDataValueSchema = z.union([
 ]);
 
 const atsWebhookDataSchema = z.record(atsWebhookDataValueSchema);
+
+/**
+ * No value is *really* undefined in transit (cannot be in json) but zod cannot represent a partial record
+ * that has strings as keys. Wait for zod4?
+ */
 export type AtsWebhookData = z.infer<typeof atsWebhookDataSchema>;
 
 const atsPartnerEventSchema = z.object({
@@ -390,9 +395,15 @@ export const candidateAssessmentSchema = z.object({
   score: z.number().optional(),
   /**
    * Refapp Addition
-   * For reference checking, the number of referees added
+   * For reference checking, the number of referees expected to answer (added + minimum requested)
    */
   total: z.number().optional(),
+
+  /**
+   * Refapp Addition
+   * For reference checking, the number of referees remaining to be submitted by the candidate
+   */
+  remainingToSubmit: z.number().optional(),
   /**
    * Refapp Addition
    * For reference checking, the number of referees that have submitted their answers
