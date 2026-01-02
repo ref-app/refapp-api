@@ -1,4 +1,4 @@
-import { z, type ZodTypeAny } from "zod";
+import { z, type ZodType } from "zod";
 // Do not import helpers here - this file needs to be standalone (apart from zod)
 
 /**
@@ -7,8 +7,12 @@ import { z, type ZodTypeAny } from "zod";
  * libraries. For now we will accept both null and undefined, but for our
  * application purposes we have Zod convert all null values to undefined.
  */
-const optionalWithNull = <T extends ZodTypeAny>(t: T) =>
-  t.nullish().transform((v) => (v === null ? undefined : v));
+const optionalWithNull = <T extends ZodType>(t: T) =>
+  t
+    .nullish()
+    .transform((v) => (v === null ? undefined : v))
+    // transform loses the optionality in zod 4 so reapply it
+    .optional();
 
 export type InfoClass = "info" | "warning" | "error" | "success" | "default";
 
@@ -46,6 +50,15 @@ export type HtmlConfigField<T extends string> = Readonly<{
    */
   options?: ReadonlyArray<HtmlConfigOption>;
   disabled?: boolean;
+  /**
+   * Indicates whether the field is required
+   */
+  required?: boolean;
+  /**
+   * Teamtailor-specific: When true, performs a new GET request to the config
+   * endpoint when this field's value is changed, passing the current field
+   * values in the webhook_data query parameter.
+   */
   refetch?: boolean;
 }>;
 
@@ -310,8 +323,12 @@ export const atsWebhookDataValueSchema = z.union([
   z.boolean(),
   z.number(),
 ]);
+export type AtsWebhookDataValue = z.infer<typeof atsWebhookDataValueSchema>;
 
-const atsWebhookDataSchema = z.record(atsWebhookDataValueSchema);
+export const atsWebhookDataSchema = z.record(
+  z.string(),
+  atsWebhookDataValueSchema
+);
 
 /**
  * No value is *really* undefined in transit (cannot be in json) but zod cannot represent a partial record
@@ -319,7 +336,11 @@ const atsWebhookDataSchema = z.record(atsWebhookDataValueSchema);
  */
 export type AtsWebhookData = z.infer<typeof atsWebhookDataSchema>;
 
-const atsPartnerEventSchema = z.object({
+export const atsPartnerEventSchema = z.object({
+  /**
+   * Unique ID for the event - used in signature calculations
+   */
+  "id": z.string().optional(),
   /**
    * Company associated with the event.
    */
@@ -373,6 +394,7 @@ export type AtsPartnerEventPayloadIncoming = z.input<
 export const candidateAttachmentSchema = z.object({
   url: z.string(),
   description: z.string(),
+  type: z.enum(["report-url", "report-pdf-data", "candidate-url"]).optional(),
 });
 export type CandidateAttachment = z.infer<typeof candidateAttachmentSchema>;
 
@@ -455,3 +477,13 @@ export const candidateResultsSchema = z.object({
 });
 
 export type CandidateResults = z.infer<typeof candidateResultsSchema>;
+
+/**
+ * Base query parameters for ATS config endpoint calls
+ */
+export const atsConfigQueryParams = z.object({
+  job_id: z.string().optional(),
+  lang: z.string().optional(),
+  recruiter: z.string().optional(),
+});
+export type AtsConfigQueryParams = z.infer<typeof atsConfigQueryParams>;
