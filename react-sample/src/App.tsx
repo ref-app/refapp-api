@@ -1,13 +1,11 @@
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import { Theme } from "@emotion/react";
 import {
+  Theme,
   Accordion,
   AccordionDetails,
   AccordionSummary,
   Box,
-  Button,
   Card,
-  CardActions,
   CardContent,
   Container,
   createTheme,
@@ -103,7 +101,7 @@ const fetchFromGitHub = async (
     const config = await response.json();
     return config;
   } catch (e) {
-    return createConfigError(e.message);
+    return createConfigError(e instanceof Error ? e.message : String(e));
   }
 };
 
@@ -125,7 +123,7 @@ const fetchFromRefapp = async (
     }
     return config;
   } catch (e) {
-    return createConfigError(e.message);
+    return createConfigError(e instanceof Error ? e.message : String(e));
   }
 };
 
@@ -177,7 +175,7 @@ const submitLive = async (
     const json = await response.json();
     return JSON.stringify(json, undefined, 2);
   } catch (e) {
-    return e.message;
+    return e instanceof Error ? e.message : String(e);
   }
 };
 
@@ -232,11 +230,10 @@ export default function App() {
   ]);
 
   const handleChange = (event: React.SyntheticEvent) => {
-    setConfigMethod(
-      toConfigMethod(
-        event.currentTarget.closest("[id^='config-']").id.substring(7)
-      )
-    );
+    const accordion = event.currentTarget.closest("[id^='config-']");
+    if (accordion) {
+      setConfigMethod(toConfigMethod(accordion.id.substring(7)));
+    }
   };
 
   const handleSubmit = (formData: FormData) => {
