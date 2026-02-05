@@ -433,6 +433,11 @@ export const candidateAssessmentSchema = z.object({
   completed: z.number().optional(),
   /**
    * Refapp Addition
+   * For reference checking, the number of referees that have declined to give a reference
+   */
+  declined: z.number().optional(),
+  /**
+   * Refapp Addition
    * A list of unique codes that might indicate fraud
    */
   fraudWarnings: z.array(z.enum(fraudWarningTypeValues)).optional(),
