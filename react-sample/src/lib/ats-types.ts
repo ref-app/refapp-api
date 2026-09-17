@@ -23,11 +23,11 @@ export type AtsConfigFieldValue = string | boolean | number;
  */
 export type HtmlConfigFieldType = "select" | "checkbox" | "text" | "hidden";
 
-export const refappLabelFieldTypes = [
+export const refappLabelFieldTypes = Object.freeze([
   "header",
   "subheader",
   "paragraph",
-] as const;
+] as const);
 
 export type RefappLabelFieldTypes = (typeof refappLabelFieldTypes)[number];
 
@@ -55,7 +55,7 @@ export type HtmlConfigField<T extends string> = Readonly<{
    */
   required?: boolean;
   /**
-   * Teamtailor-specific: When true, performs a new GET request to the config
+   * When true, perform a new GET request to the config
    * endpoint when this field's value is changed, passing the current field
    * values in the webhook_data query parameter.
    */
@@ -86,9 +86,64 @@ export type AtsConfigField =
         "label-class"?: InfoClass;
       }>);
 
+export const atsMovingCriterionOutcome = z.object({
+  /**
+   * Stable identifier the ATS stores stage-routing rules against. Never
+   * translated, never renamed.
+   */
+  id: z.string(),
+  label: z.string(),
+  hint: z.string().optional(),
+});
+
+export type AtsMovingCriterionOutcome = z.infer<
+  typeof atsMovingCriterionOutcome
+>;
+
+/**
+ * A value the ATS may build stage-routing rules on. Declared alongside the
+ * config fields and reported back in {@link CandidateResults} `criteria`.
+ */
+export const atsMovingCriterion = z.discriminatedUnion("kind", [
+  z.object({
+    id: z.string(),
+    name: z.string(),
+    kind: z.literal("outcome"),
+    outcomes: z.array(atsMovingCriterionOutcome).min(1),
+  }),
+  z.object({
+    id: z.string(),
+    name: z.string(),
+    kind: z.literal("score"),
+    /**
+     * Defaults to 0-100 when omitted.
+     */
+    range: z.object({ min: z.number(), max: z.number() }).optional(),
+  }),
+]);
+
+export type AtsMovingCriterion = z.infer<typeof atsMovingCriterion>;
+
+/**
+ * Outcomes of the background check criterion. These ids are a public contract:
+ * an ATS stores recruiter rules against them and a rule that stops matching
+ * fails silently, so renaming one breaks customer automations without error.
+ */
+export const backgroundCheckOutcomeValues = Object.freeze([
+  "in_progress",
+  "clear",
+  "anomalies_pending_review",
+  "anomalies_approved",
+  "anomalies_rejected",
+  "declined",
+] as const);
+export type BackgroundCheckOutcome =
+  (typeof backgroundCheckOutcomeValues)[number];
+
 export type AtsConfigResult<T extends HtmlConfigField<string>> = {
   readonly config: {
     readonly fields: ReadonlyArray<T>;
+    readonly moving_criteria?: ReadonlyArray<AtsMovingCriterion>;
   };
 };
 
@@ -153,6 +208,20 @@ export const atsRecruiterSchema = z.object({
    * user back from the external system
    */
   "ats-url": optionalWithNull(z.string()),
+  /**
+   * Refapp Addition
+   * An additional user identifier that the ATS knows about for the user,
+   * currently used to provide SAML NameID values to synchronise login users
+   * between ATS and Refapp.
+   *
+   * Normalised to an array of candidates so that Talentech can supply
+   * multiple trailing-digit variants (longest/most-specific first).
+   * A plain string sent by other ATS systems is wrapped in a single-element
+   * array during Zod parsing.
+   */
+  "external-user-identifier": optionalWithNull(
+    z.union([z.string().transform((v): string[] => [v]), z.array(z.string())])
+  ),
 });
 
 export type AtsRecruiter = z.infer<typeof atsRecruiterSchema>;
@@ -160,7 +229,6 @@ export type AtsRecruiter = z.infer<typeof atsRecruiterSchema>;
 const atsJobSchema = z.object({
   /**
    * Unique job id.
-   * Expanded from Teamtailor number to number or string
    */
   "id": z.union([z.number(), z.string()]),
   /**
@@ -219,11 +287,11 @@ const atsRefereeSchema = z.object({
   /**
    * First name of the referee.
    */
-  "first-name": z.string(),
+  "first-name": optionalWithNull(z.string()),
   /**
    * Last name of the referee.
    */
-  "last-name": z.string(),
+  "last-name": optionalWithNull(z.string()),
   /**
    * Email of the referee.
    */
@@ -252,17 +320,16 @@ export type AtsReferee = z.infer<typeof atsRefereeSchema>;
 const atsCandidateSchema = z.object({
   /**
    * Unique candidate id.
-   * Expanded from Teamtailor number to number or string
    */
   "id": z.union([z.number(), z.string()]),
   /**
    * First name of the candidate.
    */
-  "first-name": z.string(),
+  "first-name": optionalWithNull(z.string()),
   /**
    * Last name of the candidate.
    */
-  "last-name": z.string(),
+  "last-name": optionalWithNull(z.string()),
   /**
    * Email of the candidate. If not provided, only SMS can be used.
    */
@@ -309,13 +376,13 @@ const atsCandidateSchema = z.object({
 
 export type AtsCandidate = z.infer<typeof atsCandidateSchema>;
 
-export const atsResultStatusValues = [
+export const atsResultStatusValues = Object.freeze([
   "sending",
   "sent",
   "pending",
   "completed",
   "failed",
-] as const;
+] as const);
 export type AtsResultStatus = (typeof atsResultStatusValues)[number];
 
 export const atsWebhookDataValueSchema = z.union([
@@ -387,9 +454,56 @@ export const atsPartnerEventPayloadSchema = z.object({
 export type AtsPartnerEventPayload = z.infer<
   typeof atsPartnerEventPayloadSchema
 >;
+
 export type AtsPartnerEventPayloadIncoming = z.input<
   typeof atsPartnerEventPayloadSchema
 >;
+
+const optionalIdentifier = z
+  .union([z.string(), z.number()])
+  .optional()
+  .catch(undefined);
+
+const optionalIdentifierObject = <T extends z.ZodRawShape>(shape: T) =>
+  z.object(shape).optional().catch(undefined);
+
+/**
+ * Every field falls back to undefined, so this also reads a payload that fails
+ * {@link atsPartnerEventPayloadSchema}.
+ */
+const atsIdentifierFields = optionalIdentifierObject({
+  "partner-event": optionalIdentifierObject({
+    "company": optionalIdentifierObject({ uuid: optionalIdentifier }),
+    "candidate": optionalIdentifierObject({
+      id: optionalIdentifier,
+      job: optionalIdentifierObject({ id: optionalIdentifier }),
+    }),
+    "partner-result": optionalIdentifierObject({ id: optionalIdentifier }),
+  }),
+});
+
+export type AtsPayloadIdentifiers = Readonly<{
+  companyUuid: string | number | undefined;
+  candidateId: string | number | undefined;
+  jobId: string | number | undefined;
+  partnerResultId: string | number | undefined;
+}>;
+
+/**
+ * Identifiers that name the sender of a partner event without exposing any
+ * personal data. Use them to make a rejected webhook traceable.
+ */
+export const getAtsPayloadIdentifiers = (
+  payload: unknown
+): AtsPayloadIdentifiers => {
+  const event = atsIdentifierFields.parse(payload)?.["partner-event"];
+  return {
+    companyUuid: event?.company?.uuid,
+    candidateId: event?.candidate?.id,
+    jobId: event?.candidate?.job?.id,
+    partnerResultId: event?.["partner-result"]?.id,
+  };
+};
 
 export const candidateAttachmentSchema = z.object({
   url: z.string(),
@@ -398,12 +512,28 @@ export const candidateAttachmentSchema = z.object({
 });
 export type CandidateAttachment = z.infer<typeof candidateAttachmentSchema>;
 
-export const fraudWarningTypeValues = [
+export const fraudWarningTypeValues = Object.freeze([
   "same-ip-address",
   "same-email-address",
   "same-phone-number",
-] as const;
+] as const);
 export type FraudWarningType = (typeof fraudWarningTypeValues)[number];
+
+export const mismatchWarningTypeValues = Object.freeze([
+  "mismatch-relation",
+  "mismatch-referee-title",
+  "mismatch-candidate-title",
+  "mismatch-relation-age",
+  "mismatch-relation-duration",
+  "mismatch-name",
+] as const);
+export type MismatchWarningType = (typeof mismatchWarningTypeValues)[number];
+
+export const warningDismissalTypeValues = Object.freeze([
+  ...fraudWarningTypeValues,
+  ...mismatchWarningTypeValues,
+] as const);
+export type WarningDismissalType = (typeof warningDismissalTypeValues)[number];
 
 export const candidateAssessmentSchema = z.object({
   /**
@@ -411,7 +541,7 @@ export const candidateAssessmentSchema = z.object({
    */
   type: z.literal("reference-check").optional(),
   /**
-   * Left for compatibility with Teamtailor test report assessments.
+   * Left for compatibility with old test report assessments.
    * Set to 100*count/total
    */
   score: z.number().optional(),
@@ -478,6 +608,23 @@ export const candidateResultsSchema = z.object({
      * Can be ignored by the receiving end if the candidateLink and url fields are handled.
      */
     attachments: z.array(candidateAttachmentSchema).optional(),
+    /**
+     * Values for the criteria declared in {@link AtsConfigResult} `moving_criteria`,
+     * keyed by criterion id. Flat on purpose: an ATS rejects nesting here.
+     */
+    criteria: z
+      .record(z.string(), z.union([z.string(), z.number()]))
+      .optional(),
+    /**
+     * Flexible JSON key-value pairs shown in ATS "View details" modal.
+     * Max 2 levels deep. Used by Teamtailor for Executive Summary breakdown.
+     */
+    details: z
+      .record(
+        z.string(),
+        z.union([z.string(), z.record(z.string(), z.string())])
+      )
+      .optional(),
   }),
 });
 
@@ -487,8 +634,26 @@ export type CandidateResults = z.infer<typeof candidateResultsSchema>;
  * Base query parameters for ATS config endpoint calls
  */
 export const atsConfigQueryParams = z.object({
+  /**
+   * Config concerns this "job" (job.id in the webhook data)
+   */
   job_id: z.string().optional(),
+  /**
+   * User interface language to rendered in config fields
+   */
   lang: z.string().optional(),
+  /**
+   * The email of the recruiter that wants to set up the Refapp project settings.
+   * Used to personalise configuration options (e.g. filter to subaccounts visible to this recruiter).
+   */
   recruiter: z.string().optional(),
+  /**
+   * Used in combination with fields with {@link HtmlConfigField.refetch}: true.
+   * Contains a JSON serialised string of the current field settings to re-render the config and adapt the content dynamically.
+   * Example usages includes:
+   * - Showing some config fields only when a checkbox is selected.
+   * - Showing extra information below a select fields, based on the currently selected item.
+   */
+  webhook_data: z.string().optional(),
 });
 export type AtsConfigQueryParams = z.infer<typeof atsConfigQueryParams>;
