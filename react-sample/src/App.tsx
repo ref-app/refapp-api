@@ -10,6 +10,12 @@ import {
   Container,
   createTheme,
   CssBaseline,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  Button,
   MenuItem,
   Select,
   TextField,
@@ -178,30 +184,46 @@ const generateCandidate = (recruiterDomain: string) => {
   };
 };
 
-const submitLive = async (
+/**
+ * The POST that Submit sends, built up front so it can be shown before it is
+ * sent. The candidate is generated once here, so what is shown is what is sent.
+ */
+type LiveRequest = Readonly<{
+  url: string;
+  headers: Readonly<Record<string, string>>;
+  body: unknown;
+}>;
+
+const buildLiveRequest = (
   postEndpoint: string,
   atsSecret: string,
   customerSecret: string | undefined,
   customerDomain: string,
-  dataObject: Record<string, any>
-): Promise<string> => {
-  try {
-    const response = await fetch(postEndpoint, {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${atsSecret}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        "partner-event": {
-          ...(customerSecret !== undefined && {
-            company: { uuid: customerSecret },
-          }),
-          "candidate": generateCandidate(customerDomain),
-          "partner-result": {},
-          "webhook-data": dataObject,
-        },
+  dataObject: AtsWebhookData
+): LiveRequest => ({
+  url: postEndpoint,
+  headers: {
+    "Authorization": `Bearer ${atsSecret}`,
+    "Content-Type": "application/json",
+  },
+  body: {
+    "partner-event": {
+      ...(customerSecret !== undefined && {
+        company: { uuid: customerSecret },
       }),
+      "candidate": generateCandidate(customerDomain),
+      "partner-result": {},
+      "webhook-data": dataObject,
+    },
+  },
+});
+
+const sendLiveRequest = async (request: LiveRequest): Promise<string> => {
+  try {
+    const response = await fetch(request.url, {
+      method: "POST",
+      headers: request.headers,
+      body: JSON.stringify(request.body),
     });
     const json = await response.json();
     return JSON.stringify(json, undefined, 2);
@@ -209,6 +231,66 @@ const submitLive = async (
     return e instanceof Error ? e.message : String(e);
   }
 };
+
+/** Keeps a secret recognisable on screen without showing all of it */
+const maskSecret = (secret: string) =>
+  secret.length > 8 ? `${secret.slice(0, 4)}…${secret.slice(-4)}` : "…";
+
+const codeBlockSx = {
+  whiteSpace: "pre",
+  overflowX: "auto",
+  p: 1,
+  bgcolor: "grey.50",
+  borderColor: "grey.300",
+  borderWidth: 1,
+  borderStyle: "solid",
+  fontFamily: "monospace",
+  fontSize: 13,
+} as const;
+
+const LiveRequestDialog = ({
+  request,
+  onCancel,
+  onSend,
+}: Readonly<{
+  request: LiveRequest | undefined;
+  onCancel: () => void;
+  onSend: (request: LiveRequest) => void;
+}>) => (
+  <Dialog
+    open={request !== undefined}
+    onClose={onCancel}
+    maxWidth="md"
+    fullWidth
+  >
+    <DialogTitle>Send this request to Refapp?</DialogTitle>
+    {request && (
+      <DialogContent sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+        <DialogContentText>
+          This starts a real reference check for the candidate below. The
+          Authorization token is shortened here but sent in full.
+        </DialogContentText>
+        <Box sx={{ ...codeBlockSx, flexShrink: 0 }}>
+          {[
+            `POST ${request.url}`,
+            ...Object.entries(request.headers).map(([name, value]) =>
+              name === "Authorization"
+                ? `${name}: Bearer ${maskSecret(value.replace(/^Bearer /, ""))}`
+                : `${name}: ${value}`
+            ),
+          ].join("\n")}
+        </Box>
+        <Box sx={codeBlockSx}>{JSON.stringify(request.body, undefined, 2)}</Box>
+      </DialogContent>
+    )}
+    <DialogActions>
+      <Button onClick={onCancel}>Cancel</Button>
+      <Button variant="contained" onClick={() => request && onSend(request)}>
+        Send
+      </Button>
+    </DialogActions>
+  </Dialog>
+);
 
 export default function App() {
   const [configMethod, setConfigMethod] =
@@ -231,6 +313,7 @@ export default function App() {
   const [liveCustomerDomain, setLiveCustomerDomain] =
     React.useState<string>("");
   const [submitResults, setSubmitResults] = React.useState<string>("");
+  const [pendingRequest, setPendingRequest] = React.useState<LiveRequest>();
   const [resetTrigger, setResetTrigger] = React.useState<number>(0);
   // Current field values, set when a field marked `refetch` changes
   const [liveWebhookData, setLiveWebhookData] =
@@ -291,13 +374,20 @@ export default function App() {
   };
 
   const handleSubmit = (values: AtsWebhookData) => {
-    submitLive(
-      livePostEndpoint,
-      liveAtsSecret,
-      liveProviderKey,
-      liveCustomerDomain,
-      values
-    ).then((result) => setSubmitResults(result));
+    setPendingRequest(
+      buildLiveRequest(
+        livePostEndpoint,
+        liveAtsSecret,
+        liveProviderKey,
+        liveCustomerDomain,
+        values
+      )
+    );
+  };
+
+  const handleSend = (request: LiveRequest) => {
+    setPendingRequest(undefined);
+    sendLiveRequest(request).then((result) => setSubmitResults(result));
   };
 
   const onReset = () => {
@@ -427,22 +517,14 @@ export default function App() {
 
         {submitResults && (
           <Card sx={{ mt: 2 }}>
-            <Box
-              sx={{
-                whiteSpace: "pre",
-                m: 2,
-                p: 1,
-                bgcolor: "grey.50",
-                borderColor: "grey.300",
-                borderWidth: 1,
-                borderStyle: "solid",
-                fontFamily: "monospace",
-              }}
-            >
-              {submitResults}
-            </Box>
+            <Box sx={{ ...codeBlockSx, m: 2 }}>{submitResults}</Box>
           </Card>
         )}
+        <LiveRequestDialog
+          request={pendingRequest}
+          onCancel={() => setPendingRequest(undefined)}
+          onSend={handleSend}
+        />
       </Container>
     </ThemeProvider>
   );

@@ -206,7 +206,7 @@ export const AtsConfigPreview = ({
             sx={{ flexGrow: 1 }}
             onClick={() => onSubmit(values)}
           >
-            Submit
+            Send
           </Button>
         )}
         <Button sx={{ flexGrow: 1 }} onClick={() => onReset()}>
