@@ -50,7 +50,7 @@ const TextContainer = ({
   labelClass,
   children,
 }: React.PropsWithChildren<{
-  labelClass: InfoClass;
+  labelClass: InfoClass | undefined;
 }>) => {
   const severity = toSeverity(labelClass);
   if (severity) {
@@ -153,16 +153,13 @@ export const AtsConfigPreview = ({
 }: AtsConfigPreviewProps) => {
   return (
     <Box
-      display="flex"
-      flexDirection="column"
-      gap={2}
-      mb={0}
+      sx={{ display: "flex", flexDirection: "column", gap: 2, mb: 0 }}
       component={"form"}
     >
       {configFields.map((field) => (
         <AtsConfigFieldPreview key={field.id} field={field} />
       ))}
-      <Box display="flex" gap={2} mx={1}>
+      <Box sx={{ display: "flex", gap: 2, mx: 1 }}>
         {onSubmit && (
           <Button
             variant="contained"
