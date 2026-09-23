@@ -14,6 +14,8 @@ import {
   Select,
   TextField,
   ThemeProvider,
+  ToggleButton,
+  ToggleButtonGroup,
   Typography,
 } from "@mui/material";
 import * as React from "react";
@@ -69,6 +71,26 @@ type ConfigMethod = (typeof configMethods)[number];
 const toConfigMethod = (value: unknown) =>
   z.enum(configMethods).catch(defaultConfigMethod).parse(value);
 
+/**
+ * "account" is Refapp's Account Integration, where the bearer token alone
+ * identifies the account. "partner" is an ATS partner integration, where each
+ * customer is identified by a separate provider key.
+ */
+const liveModes = ["account", "partner"] as const;
+const defaultLiveMode = liveModes[0];
+type LiveMode = (typeof liveModes)[number];
+const toLiveMode = (value: unknown) =>
+  z.enum(liveModes).catch(defaultLiveMode).parse(value);
+
+type LiveEndpoints = { config: string; post: string };
+const defaultLiveEndpoints: Record<LiveMode, LiveEndpoints> = {
+  account: {
+    config: "https://app.refapp.com/webhooks/account-integration/config",
+    post: "https://app.refapp.com/webhooks/account-integration",
+  },
+  partner: { config: "", post: "" },
+};
+
 const safeUrl = (url: string) => {
   try {
     return new URL(url);
@@ -108,13 +130,15 @@ const fetchFromGitHub = async (
 const fetchFromRefapp = async (
   configEndpoint: string,
   atsSecret: string,
-  customerSecret: string
+  customerSecret: string | undefined
 ): Promise<RefappAtsConfig> => {
   try {
     const response = await fetch(configEndpoint, {
       headers: {
-        "Authorization": `Bearer ${atsSecret}`,
-        "X-Provider-Key": customerSecret,
+        Authorization: `Bearer ${atsSecret}`,
+        ...(customerSecret !== undefined && {
+          "X-Provider-Key": customerSecret,
+        }),
       },
     });
     const config = await response.json();
@@ -152,7 +176,7 @@ const generateCandidate = (recruiterDomain: string) => {
 const submitLive = async (
   postEndpoint: string,
   atsSecret: string,
-  customerSecret: string,
+  customerSecret: string | undefined,
   customerDomain: string,
   dataObject: Record<string, any>
 ): Promise<string> => {
@@ -165,7 +189,9 @@ const submitLive = async (
       },
       body: JSON.stringify({
         "partner-event": {
-          "company": { uuid: customerSecret },
+          ...(customerSecret !== undefined && {
+            company: { uuid: customerSecret },
+          }),
           "candidate": generateCandidate(customerDomain),
           "partner-result": {},
           "webhook-data": dataObject,
@@ -184,9 +210,16 @@ export default function App() {
     React.useState<ConfigMethod>(defaultConfigMethod);
   const [atsConfigFile, setAtsConfigFile] = React.useState<ConfigFile | "">("");
   const [atsConfig, setAtsConfig] = React.useState<RefappAtsConfig>();
-  const [liveConfigEndpoint, setLiveConfigEndpoint] =
-    React.useState<string>("");
-  const [livePostEndpoint, setLivePostEndpoint] = React.useState<string>("");
+  const [liveMode, setLiveMode] = React.useState<LiveMode>(defaultLiveMode);
+  const [liveEndpoints, setLiveEndpoints] =
+    React.useState<Record<LiveMode, LiveEndpoints>>(defaultLiveEndpoints);
+  const { config: liveConfigEndpoint, post: livePostEndpoint } =
+    liveEndpoints[liveMode];
+  const setLiveEndpoint = (endpoint: keyof LiveEndpoints, value: string) =>
+    setLiveEndpoints((endpoints) => ({
+      ...endpoints,
+      [liveMode]: { ...endpoints[liveMode], [endpoint]: value },
+    }));
   const [liveAtsSecret, setLiveAtsSecret] = React.useState<string>("");
   const [liveCustomerSecret, setLiveCustomerSecret] =
     React.useState<string>("");
@@ -195,6 +228,9 @@ export default function App() {
   const [submitResults, setSubmitResults] = React.useState<string>("");
   const [resetTrigger, setResetTrigger] = React.useState<number>(0);
   const theme = React.useMemo(() => createOurTheme(), []);
+  // Account Integration has no provider key: the token identifies the account
+  const liveProviderKey =
+    liveMode === "partner" ? liveCustomerSecret : undefined;
 
   React.useEffect(() => {
     const configEndpointUrl = safeUrl(liveConfigEndpoint);
@@ -210,13 +246,11 @@ export default function App() {
       postEndpointUrl !== undefined &&
       postEndpointUrl.pathname.length > 0 &&
       liveAtsSecret.length > 0 &&
-      liveCustomerSecret.length > 0
+      (liveProviderKey === undefined || liveProviderKey.length > 0)
     ) {
-      fetchFromRefapp(
-        liveConfigEndpoint,
-        liveAtsSecret,
-        liveCustomerSecret
-      ).then((atsConfig) => setAtsConfig(atsConfig));
+      fetchFromRefapp(liveConfigEndpoint, liveAtsSecret, liveProviderKey).then(
+        (atsConfig) => setAtsConfig(atsConfig)
+      );
     } else {
       setAtsConfig(undefined);
     }
@@ -225,7 +259,7 @@ export default function App() {
     atsConfigFile,
     liveConfigEndpoint,
     liveAtsSecret,
-    liveCustomerSecret,
+    liveProviderKey,
     resetTrigger,
   ]);
 
@@ -241,7 +275,7 @@ export default function App() {
     submitLive(
       livePostEndpoint,
       liveAtsSecret,
-      liveCustomerSecret,
+      liveProviderKey,
       liveCustomerDomain,
       dataObject
     ).then((result) => setSubmitResults(result));
@@ -302,26 +336,46 @@ export default function App() {
                 gap: 2,
               }}
             >
+              <ToggleButtonGroup
+                exclusive
+                fullWidth
+                color="primary"
+                value={liveMode}
+                onChange={(_, value) => {
+                  if (value !== null) {
+                    setLiveMode(toLiveMode(value));
+                  }
+                }}
+              >
+                <ToggleButton value="account">Account integration</ToggleButton>
+                <ToggleButton value="partner">ATS partner</ToggleButton>
+              </ToggleButtonGroup>
               <TextField
+                key={`${liveMode}-config`}
                 label={"Configuration Endpoint"}
                 value={liveConfigEndpoint}
-                onChange={(e) => setLiveConfigEndpoint(e.currentTarget.value)}
+                onChange={(e) =>
+                  setLiveEndpoint("config", e.currentTarget.value)
+                }
               />
               <TextField
+                key={`${liveMode}-post`}
                 label={"POST Endpoint"}
                 value={livePostEndpoint}
-                onChange={(e) => setLivePostEndpoint(e.currentTarget.value)}
+                onChange={(e) => setLiveEndpoint("post", e.currentTarget.value)}
               />
               <TextField
-                label={"ATS secret"}
+                label={liveMode === "account" ? "Account token" : "ATS secret"}
                 value={liveAtsSecret}
                 onChange={(e) => setLiveAtsSecret(e.currentTarget.value)}
               />
-              <TextField
-                label={"Customer secret"}
-                value={liveCustomerSecret}
-                onChange={(e) => setLiveCustomerSecret(e.currentTarget.value)}
-              />
+              {liveMode === "partner" && (
+                <TextField
+                  label={"Customer secret"}
+                  value={liveCustomerSecret}
+                  onChange={(e) => setLiveCustomerSecret(e.currentTarget.value)}
+                />
+              )}
               <TextField
                 label={"Customer email domain"}
                 value={liveCustomerDomain}
