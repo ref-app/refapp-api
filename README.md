@@ -7,6 +7,14 @@ Public content for the Refapp APIs
 The [react-sample](./react-sample/) directory contains a small project that renders the payload returned from the
 /config endpoint.
 
-You can run it locally after cloning this repository or 
+You can run it locally after cloning this repository:
+
+```
+cd react-sample
+npm install
+npm start
+```
+
+or open it in StackBlitz:
 
 [![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/fork/github/ref-app/refapp-api/tree/main/react-sample)
