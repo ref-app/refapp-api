@@ -133,6 +133,29 @@ const fetchFromGitHub = async (
   }
 };
 
+/**
+ * Refapp answers some errors in plain text rather than JSON, such as a 401
+ * from a config endpoint, so parse JSON only when the body is JSON.
+ */
+const readJsonOrText = async (response: Response): Promise<unknown> => {
+  const text = await response.text();
+  try {
+    return JSON.parse(text);
+  } catch (_) {
+    return text;
+  }
+};
+
+const errorMessage = (response: Response, body: unknown) => {
+  const message =
+    typeof body === "string"
+      ? body
+      : typeof body === "object" && body !== null && "message" in body
+        ? String(body.message)
+        : undefined;
+  return `HTTP ${response.status}: ${message ?? "Request failed"}`;
+};
+
 const fetchFromRefapp = async (
   configEndpoint: string,
   atsSecret: string,
@@ -152,11 +175,11 @@ const fetchFromRefapp = async (
         }),
       },
     });
-    const config = await response.json();
+    const body = await readJsonOrText(response);
     if (!response.ok) {
-      return createConfigError(config.message);
+      return createConfigError(errorMessage(response, body));
     }
-    return config;
+    return body as RefappAtsConfig;
   } catch (e) {
     return createConfigError(e instanceof Error ? e.message : String(e));
   }
@@ -185,7 +208,7 @@ const generateCandidate = (recruiterDomain: string) => {
 };
 
 /**
- * The POST that Submit sends, built up front so it can be shown before it is
+ * The POST that Send makes, built up front so it can be shown before it is
  * sent. The candidate is generated once here, so what is shown is what is sent.
  */
 type LiveRequest = Readonly<{
@@ -225,8 +248,11 @@ const sendLiveRequest = async (request: LiveRequest): Promise<string> => {
       headers: request.headers,
       body: JSON.stringify(request.body),
     });
-    const json = await response.json();
-    return JSON.stringify(json, undefined, 2);
+    const body = await readJsonOrText(response);
+    return [
+      `HTTP ${response.status}`,
+      typeof body === "string" ? body : JSON.stringify(body, undefined, 2),
+    ].join("\n");
   } catch (e) {
     return e instanceof Error ? e.message : String(e);
   }
