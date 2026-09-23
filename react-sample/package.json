@@ -9,7 +9,7 @@
     "@types/react-dom": "^19.3.0",
     "lodash": "^4.17.21",
     "markdown-to-jsx": "^9.5.0",
-    "mui-markdown": "^2.1.0",
+    "mui-markdown": "^3.0.1",
     "prism-react-renderer": "^2.4.1",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
