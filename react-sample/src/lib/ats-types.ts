@@ -124,22 +124,6 @@ export const atsMovingCriterion = z.discriminatedUnion("kind", [
 
 export type AtsMovingCriterion = z.infer<typeof atsMovingCriterion>;
 
-/**
- * Outcomes of the background check criterion. These ids are a public contract:
- * an ATS stores recruiter rules against them and a rule that stops matching
- * fails silently, so renaming one breaks customer automations without error.
- */
-export const backgroundCheckOutcomeValues = Object.freeze([
-  "in_progress",
-  "clear",
-  "anomalies_pending_review",
-  "anomalies_approved",
-  "anomalies_rejected",
-  "declined",
-] as const);
-export type BackgroundCheckOutcome =
-  (typeof backgroundCheckOutcomeValues)[number];
-
 export type AtsConfigResult<T extends HtmlConfigField<string>> = {
   readonly config: {
     readonly fields: ReadonlyArray<T>;
@@ -231,6 +215,13 @@ const atsJobSchema = z.object({
    * Unique job id.
    */
   "id": z.union([z.number(), z.string()]),
+  /**
+   * Refapp Addition
+   * Further ids the same job is known by in the ATS. A project matches on any
+   * of them, so a partner naming one job differently per product still
+   * resolves to a single Refapp project.
+   */
+  "alternate-ids": optionalWithNull(z.array(z.union([z.number(), z.string()]))),
   /**
    * Title of the job.
    */
@@ -526,6 +517,7 @@ export const mismatchWarningTypeValues = Object.freeze([
   "mismatch-relation-age",
   "mismatch-relation-duration",
   "mismatch-name",
+  "mismatch-identity-verification-name",
 ] as const);
 export type MismatchWarningType = (typeof mismatchWarningTypeValues)[number];
 
