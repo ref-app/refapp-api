@@ -1,3 +1,4 @@
 node_modules/
 react-sample/build/
+react-sample/dist/
 .claude/settings.local.json
