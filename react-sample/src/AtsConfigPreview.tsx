@@ -18,6 +18,7 @@ import * as _ from "lodash";
 import {
   AtsConfigField,
   AtsConfigFieldValue,
+  AtsWebhookData,
   HtmlConfigFieldType,
   InfoClass,
   RefappConfigFieldType,
@@ -61,18 +62,14 @@ const TextContainer = ({
 
 type AtsConfigFieldPreviewProps = Readonly<{
   field: AtsConfigField;
+  value: AtsConfigFieldValue | undefined;
+  setValue: (value: AtsConfigFieldValue) => void;
 }>;
 export const AtsConfigFieldPreview = ({
   field,
+  value,
+  setValue,
 }: AtsConfigFieldPreviewProps) => {
-  const [value, setValue] = React.useState<AtsConfigFieldValue | undefined>(
-    field.value
-  );
-
-  React.useEffect(() => {
-    setValue(field.value);
-  }, [field]);
-
   switch (field.type) {
     case "checkbox":
       return (
@@ -93,17 +90,20 @@ export const AtsConfigFieldPreview = ({
     case "subheader":
     case "paragraph":
       return (
-          <TextContainer labelClass={field["label-class"]}>
-            {field["label-markdown"] ? (
-              <Typography component="div">
-                <MuiMarkdown>{field["label-markdown"]}</MuiMarkdown>
-              </Typography>
-            ) : (
-              <Typography sx={{ mx: 1}} variant={textVariantFromFieldType(field.type)}>
-                {field.label}
-              </Typography>
-            )}
-          </TextContainer>
+        <TextContainer labelClass={field["label-class"]}>
+          {field["label-markdown"] ? (
+            <Typography component="div">
+              <MuiMarkdown>{field["label-markdown"]}</MuiMarkdown>
+            </Typography>
+          ) : (
+            <Typography
+              sx={{ mx: 1 }}
+              variant={textVariantFromFieldType(field.type)}
+            >
+              {field.label}
+            </Typography>
+          )}
+        </TextContainer>
       );
     case "select":
       return field.options ? (
@@ -141,30 +141,70 @@ export const AtsConfigFieldPreview = ({
   return assertIsNever(field);
 };
 
+/**
+ * The initial value of every field that has one, keyed by field id. This is
+ * the shape Refapp expects in webhook_data.
+ */
+const valuesFromFields = (
+  fields: ReadonlyArray<AtsConfigField>
+): AtsWebhookData =>
+  Object.fromEntries(
+    fields.flatMap((field) =>
+      field.value === undefined ? [] : [[field.id, field.value]]
+    )
+  );
+
 type AtsConfigPreviewProps = Readonly<{
   configFields: ReadonlyArray<AtsConfigField>;
   onReset: () => void;
-  onSubmit?: (data: FormData) => void;
+  onSubmit?: (values: AtsWebhookData) => void;
+  /**
+   * Called with all current values when a field marked `refetch` changes,
+   * so the config can be fetched again with them in webhook_data.
+   */
+  onRefetch?: (values: AtsWebhookData) => void;
 }>;
 export const AtsConfigPreview = ({
   configFields,
   onReset,
   onSubmit,
+  onRefetch,
 }: AtsConfigPreviewProps) => {
+  const [values, setValues] = React.useState<AtsWebhookData>(() =>
+    valuesFromFields(configFields)
+  );
+
+  React.useEffect(() => {
+    setValues(valuesFromFields(configFields));
+  }, [configFields]);
+
+  const setFieldValue = (field: AtsConfigField, value: AtsConfigFieldValue) => {
+    const newValues = { ...values, [field.id]: value };
+    setValues(newValues);
+    if (field.refetch) {
+      onRefetch?.(newValues);
+    }
+  };
+
   return (
     <Box
       sx={{ display: "flex", flexDirection: "column", gap: 2, mb: 0 }}
       component={"form"}
     >
       {configFields.map((field) => (
-        <AtsConfigFieldPreview key={field.id} field={field} />
+        <AtsConfigFieldPreview
+          key={field.id}
+          field={field}
+          value={values[field.id]}
+          setValue={(value) => setFieldValue(field, value)}
+        />
       ))}
       <Box sx={{ display: "flex", gap: 2, mx: 1 }}>
         {onSubmit && (
           <Button
             variant="contained"
             sx={{ flexGrow: 1 }}
-            onClick={() => onSubmit(new FormData(document.forms[0]))}
+            onClick={() => onSubmit(values)}
           >
             Submit
           </Button>

@@ -20,10 +20,10 @@ import {
 } from "@mui/material";
 import * as React from "react";
 import { AtsConfigPreview } from "./AtsConfigPreview";
-import { RefappAtsConfig } from "./lib/ats-types";
+import { AtsWebhookData, RefappAtsConfig } from "./lib/ats-types";
 import "./style.css";
 import { z } from "zod";
-import { fromPairs, map, random } from "lodash";
+import { map, random } from "lodash";
 
 /**
  * From the config-examples directory in this repository
@@ -130,10 +130,15 @@ const fetchFromGitHub = async (
 const fetchFromRefapp = async (
   configEndpoint: string,
   atsSecret: string,
-  customerSecret: string | undefined
+  customerSecret: string | undefined,
+  webhookData: AtsWebhookData | undefined
 ): Promise<RefappAtsConfig> => {
   try {
-    const response = await fetch(configEndpoint, {
+    const url = new URL(configEndpoint);
+    if (webhookData !== undefined) {
+      url.searchParams.set("webhook_data", JSON.stringify(webhookData));
+    }
+    const response = await fetch(url, {
       headers: {
         Authorization: `Bearer ${atsSecret}`,
         ...(customerSecret !== undefined && {
@@ -227,18 +232,26 @@ export default function App() {
     React.useState<string>("");
   const [submitResults, setSubmitResults] = React.useState<string>("");
   const [resetTrigger, setResetTrigger] = React.useState<number>(0);
+  // Current field values, set when a field marked `refetch` changes
+  const [liveWebhookData, setLiveWebhookData] =
+    React.useState<AtsWebhookData>();
   const theme = React.useMemo(() => createOurTheme(), []);
   // Account Integration has no provider key: the token identifies the account
   const liveProviderKey =
     liveMode === "partner" ? liveCustomerSecret : undefined;
 
   React.useEffect(() => {
+    // Refetching can have several requests in flight; keep only the latest
+    let ignore = false;
+    const setLatestAtsConfig = (atsConfig: RefappAtsConfig | undefined) => {
+      if (!ignore) {
+        setAtsConfig(atsConfig);
+      }
+    };
     const configEndpointUrl = safeUrl(liveConfigEndpoint);
     const postEndpointUrl = safeUrl(livePostEndpoint);
     if (configMethod === "sample" && atsConfigFile !== "") {
-      fetchFromGitHub(atsConfigFile).then((atsConfig) =>
-        setAtsConfig(atsConfig)
-      );
+      fetchFromGitHub(atsConfigFile).then(setLatestAtsConfig);
     } else if (
       configMethod === "live" &&
       configEndpointUrl !== undefined &&
@@ -248,18 +261,25 @@ export default function App() {
       liveAtsSecret.length > 0 &&
       (liveProviderKey === undefined || liveProviderKey.length > 0)
     ) {
-      fetchFromRefapp(liveConfigEndpoint, liveAtsSecret, liveProviderKey).then(
-        (atsConfig) => setAtsConfig(atsConfig)
-      );
+      fetchFromRefapp(
+        liveConfigEndpoint,
+        liveAtsSecret,
+        liveProviderKey,
+        liveWebhookData
+      ).then(setLatestAtsConfig);
     } else {
       setAtsConfig(undefined);
     }
+    return () => {
+      ignore = true;
+    };
   }, [
     configMethod,
     atsConfigFile,
     liveConfigEndpoint,
     liveAtsSecret,
     liveProviderKey,
+    liveWebhookData,
     resetTrigger,
   ]);
 
@@ -270,20 +290,20 @@ export default function App() {
     }
   };
 
-  const handleSubmit = (formData: FormData) => {
-    const dataObject = fromPairs(Array.from(formData));
+  const handleSubmit = (values: AtsWebhookData) => {
     submitLive(
       livePostEndpoint,
       liveAtsSecret,
       liveProviderKey,
       liveCustomerDomain,
-      dataObject
+      values
     ).then((result) => setSubmitResults(result));
   };
 
   const onReset = () => {
     console.log("onReset");
     setSubmitResults("");
+    setLiveWebhookData(undefined);
     setResetTrigger((count) => count + 1);
   };
 
@@ -393,6 +413,7 @@ export default function App() {
                   configFields={atsConfig.config.fields}
                   onReset={onReset}
                   onSubmit={handleSubmit}
+                  onRefetch={setLiveWebhookData}
                 />
               ) : (
                 <AtsConfigPreview
